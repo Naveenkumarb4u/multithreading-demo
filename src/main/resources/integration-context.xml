@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/integration
+                           http://www.springframework.org/schema/integration/spring-integration.xsd">
+
+    <int:channel id="inputChannel"/>
+
+ <!--   <int:channel id="evenChannel">
+        <int:dispatcher task-executor="evenExecutor"/>
+    </int:channel>
+
+    <int:channel id="oddChannel">
+        <int:dispatcher task-executor="oddExecutor"/>
+    </int:channel>-->
+
+    <int:channel id="validateChannel"/>
+    <int:channel id="filterChannel"/>
+    <int:channel id="transformChannel"/>
+    <int:channel id="processorChannel"/>
+
+<!--    <int:router input-channel="inputChannel" expression="payload.payloadId % 2">
+        <int:mapping value="0" channel="evenChannel"/>
+        <int:mapping value="1" channel="oddChannel"/>
+    </int:router>-->
+    <!-- Executor that has 8 threads -->
+<!--
+    <bean id="executor" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool">
+        <constructor-arg value="8"/>
+    </bean>
+-->
+
+    <!-- Executor that will use custom thread assignment -->
+    <bean id="customExecutor" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool">
+        <constructor-arg>
+            <bean class="com.example.demo.ThreadFactoryUtil" factory-method="threadFactory"/>
+        </constructor-arg>
+    </bean>
+    <!-- Executor that will use custom thread assignment with configurable thread pool size -->
+   <!-- <bean id="customExecutor" class="java.util.concurrent.Executors" factory-method="newFixedThreadPool">
+        <constructor-arg>
+            <value>${thread.pool.size}</value>
+        </constructor-arg>
+    </bean>-->
+    <!--<int:channel id="executorChannel">
+        <int:dispatcher task-executor="executor"/>
+    </int:channel>-->
+    <!-- Use a custom executor -->
+    <int:channel id="executorChannel">
+        <int:dispatcher task-executor="customExecutor"/>
+    </int:channel>
+    <!-- Router to route the messages based on payloadId % 8 -->
+    <int:router input-channel="inputChannel" expression="payload.payloadId % 8">
+        <int:mapping value="0" channel="executorChannel"/>
+        <int:mapping value="1" channel="executorChannel"/>
+        <int:mapping value="2" channel="executorChannel"/>
+        <int:mapping value="3" channel="executorChannel"/>
+        <int:mapping value="4" channel="executorChannel"/>
+        <int:mapping value="5" channel="executorChannel"/>
+        <int:mapping value="6" channel="executorChannel"/>
+        <int:mapping value="7" channel="executorChannel"/>
+    </int:router>
+    <int:service-activator input-channel="executorChannel" ref="threadAssignmentProcessor" method="handleMessage"/>
+
+<!--
+    <int:bridge input-channel="evenChannel" output-channel="validateChannel"/>
+    <int:bridge input-channel="oddChannel" output-channel="validateChannel"/>
+-->
+    <int:bridge input-channel="executorChannel" output-channel="validateChannel"/>
+
+    <int:service-activator input-channel="validateChannel" output-channel="filterChannel"
+                           ref="validationService" method="validate"/>
+    <int:filter input-channel="filterChannel" output-channel="transformChannel"
+                ref="filterService" method="filter"/>
+    <int:transformer input-channel="transformChannel" output-channel="processorChannel"
+                     ref="transformService" method="transform"/>
+    <int:service-activator input-channel="processorChannel"
+                           ref="processorService" method="process"/>
+
+   <!-- <bean id="evenExecutor" class="java.util.concurrent.Executors" factory-method="newSingleThreadExecutor">
+        <constructor-arg>
+            <bean class="com.example.demo.ThreadFactoryUtil" factory-method="evenThreadFactory"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="oddExecutor" class="java.util.concurrent.Executors" factory-method="newSingleThreadExecutor">
+        <constructor-arg>
+            <bean class="com.example.demo.ThreadFactoryUtil" factory-method="oddThreadFactory"/>
+        </constructor-arg>
+    </bean>-->
+</beans>
