@@ -42,63 +42,6 @@ public class PayloadIdBasedDispatcher {
         }
     }
 
-    /*    @ServiceActivator(inputChannel = "inputChannel")
-        public void dispatchMessage(Message<?> message) {
-            String payloadId = getPayloadId((MyPayload) message.getPayload());
-            logger.info("dispatchMessage: Received message with payloadId: {}", payloadId);
-            if (payloadId != null) {
-                Lock lock = payloadLocks.computeIfAbsent(payloadId, k -> new ReentrantLock());
-                logger.info("dispatchMessage: Got lock for payloadId: {}", payloadId);
-                lock.lock();
-                try {
-                    int hashCode = payloadId.hashCode();
-                    int threadIndex = Math.abs(hashCode % taskExecutor.getCorePoolSize());
-                    String targetThreadName = "thread-" + (threadIndex + 1);
-                    logger.info("dispatchMessage: Target thread for payloadId {}: {}", payloadId, targetThreadName);
-
-                    BlockingQueue<Runnable> targetQueue = threadQueues.get(targetThreadName);
-                    if (targetQueue != null) {
-                        logger.info("Offering to queue {} for thread {}", System.identityHashCode(targetQueue), targetThreadName);
-                        *//*boolean offered = targetQueue.offer(() -> {
-                        logger.info("Worker processing payloadId: {} on thread: {}", payloadId, Thread.currentThread().getName());
-                        validatedChannel.send(MessageBuilder.fromMessage(message)
-                                .setHeader("payloadLock", lock)
-                                .setHeader("payloadId", payloadId)
-                                .build());
-                    });*//*
-                    if (targetQueue != null) {
-                        targetQueue.offer(() -> processPayload(message, lock, payloadId));
-                    } else {
-                        logger.warn("No queue found for target thread: {}", targetThreadName);
-                        taskExecutor.execute(() -> processPayload(message, lock, payloadId)); // Fallback
-                    }
-
-                  *//*  if (offered) {
-                        logger.info("dispatchMessage: Offered task for payloadId {} to queue {}: {}", payloadId, targetThreadName, offered);
-                    } else {
-                        logger.warn("dispatchMessage: Failed to offer task for payloadId {} to queue {}", payloadId, targetThreadName);
-                        // Consider alternative handling if offer fails
-                    }*//*
-                } else {
-                    logger.warn("dispatchMessage: No queue found for target thread: {}", targetThreadName);
-                    // Fallback
-                    taskExecutor.execute(() -> {
-                        logger.warn("dispatchMessage: Fallback processing for payloadId: {} on thread: {}", payloadId, Thread.currentThread().getName());
-                        validatedChannel.send(MessageBuilder.fromMessage(message)
-                                .setHeader("payloadLock", lock)
-                                .setHeader("payloadId", payloadId)
-                                .build());
-                    });
-                }
-
-            } finally {
-                // Do not unlock here. Downstream will handle it.
-            }
-        } else {
-            logger.warn("dispatchMessage: Received message without payloadId: {}", message.getPayload());
-            taskExecutor.execute(() -> validatedChannel.send(message));
-        }
-    }*/
     @ServiceActivator(inputChannel = "inputChannel")
     public void dispatchMessage(Message<?> message) {
         Object payloadId = getPayloadId((MyPayload) message.getPayload());

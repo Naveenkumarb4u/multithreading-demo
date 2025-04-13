@@ -16,23 +16,11 @@
     <int:channel id="persistChannel"/>
     <int:channel id="errorChannel"/>
 
-    <int:service-activator input-channel="errorChannel">
-        <bean class="com.multithreading.error.GlobalErrorHandler"/>
-    </int:service-activator>
-
-    <int:service-activator input-channel="inputChannel">
-        <bean class="com.multithreading.dispatcher.PayloadIdBasedDispatcher">
-            <constructor-arg ref="payloadTaskExecutor"/>
-            <constructor-arg ref="executorChannel"/>
-        </bean>
-    </int:service-activator>
-
     <int:bridge input-channel="executorChannel" output-channel="validateChannel"/>
 
     <int:service-activator input-channel="validateChannel" output-channel="filterChannel" ref="validationService" method="validate"/>
     <int:filter input-channel="filterChannel" output-channel="transformChannel" ref="filterService" method="filter"/>
     <int:transformer input-channel="transformChannel" output-channel="processorChannel" ref="transformService" method="transform"/>
     <int:service-activator input-channel="processorChannel" ref="processorService" method="process"/>
-   <!-- <int:service-activator input-channel="persistChannel" ref="persistorService" method="persist"/>-->
 
 </beans>

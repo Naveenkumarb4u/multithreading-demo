@@ -28,33 +28,18 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        //Thread.sleep(1000);
+        Thread.sleep(1000);
         log.info("Sending New message...");
-        for (int i = 100; i <= 103; i++) {
-            Message<MyPayload> message = MessageBuilder.withPayload(new MyPayload("PAYLOAD_" + i)).build();
+        for (int i = 1; i <= 3; i++) {
+            Message<MyPayload> message = MessageBuilder.withPayload(new MyPayload("" + i)).build();
             
             context.getBean("inputChannel", org.springframework.messaging.MessageChannel.class).send(message);
         }
-
-//        Message<MyPayload> message2 = MessageBuilder.withPayload(new MyPayload("PayloadID_101")).build();
-//        context.getBean("inputChannel", org.springframework.messaging.MessageChannel.class).send(message2);
-    /*    log.info("Sleeping...");
-        Thread.sleep(5000);
-        log.info("Sending duplicate message once...");
-        Message<MyPayload> message1 = MessageBuilder.withPayload(new MyPayload("" + 103)).build();
-        context.getBean("inputChannel", org.springframework.messaging.MessageChannel.class).send(message1);
-        log.info("Sleeping again...");
-        Thread.sleep(5000);
-        log.info("Sending one more duplicate message...");
-        Message<MyPayload> message2 = MessageBuilder.withPayload(new MyPayload("" + 103)).build();
-        context.getBean("inputChannel", org.springframework.messaging.MessageChannel.class).send(message2);
-        log.info("Sleeping once more...");
-        Thread.sleep(5000); // Give time for async processing
-        log.info("Sending more and more duplicate messages...");
-        for (int i = 100; i <= 3; i++) {
-            Message<MyPayload> message = MessageBuilder.withPayload(new MyPayload("" + 103)).build();
+        log.info("Sending same message again...");
+        for (int i = 1; i <= 3; i++) {
+            Message<MyPayload> message = MessageBuilder.withPayload(new MyPayload("" + i)).build();
             context.getBean("inputChannel", org.springframework.messaging.MessageChannel.class).send(message);
         }
-        Thread.sleep(3000);*/
+
     }
 }
