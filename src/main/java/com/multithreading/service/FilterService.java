@@ -1,14 +1,16 @@
-package com.example.demo;
+package com.multithreading.service;
 
-import com.example.demo.model.MyPayload;
+import com.multithreading.model.MyPayload;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
+@Log4j2
 @Component
 public class FilterService {
     public boolean filter(Message<?> message) {
         MyPayload payload = (MyPayload) message.getPayload();
-        System.out.println("Thread: " + Thread.currentThread().getName() + " | Stage: Filter | Payload ID: " + payload.getPayloadId());
+        log.info("Thread: " + Thread.currentThread().getName() + " | Stage: Filter | Payload ID: " + payload.getPayloadId());
         return true;
     }
 }
