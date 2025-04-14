@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootApplication
@@ -28,18 +29,28 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Thread.sleep(1000);
-        log.info("Sending New message...");
-        for (int i = 1; i <= 3; i++) {
-            Message<MyPayload> message = MessageBuilder.withPayload(new MyPayload("" + i)).build();
-            
-            context.getBean("inputChannel", org.springframework.messaging.MessageChannel.class).send(message);
-        }
-        log.info("Sending same message again...");
-        for (int i = 1; i <= 3; i++) {
-            Message<MyPayload> message = MessageBuilder.withPayload(new MyPayload("" + i)).build();
-            context.getBean("inputChannel", org.springframework.messaging.MessageChannel.class).send(message);
-        }
 
+        Thread.sleep(10000);
+        log.info("Sending sample messages...");
+        send("1", "data1");
+        send("2", "data2");
+        send("1", "data1-again"); // Same payloadId as the first message
+        send("3", "data3 ignore this");
+        send("2", "data2-again"); // Same payloadId as the second message
+        send("4", "data4");
+        send("6", "data6");
+        send("5", "data5");
+
+        // Wait for some time to allow processing to complete
+        Thread.sleep(10000);
+        log.info("Finished sending sample messages.");
     }
+
+    private void send(String id, String data) {
+        MyPayload payload = new MyPayload(id, data);
+        log.info("Sending message with payload: {}", payload);
+        MessageChannel inputChannel = context.getBean("inputChannel", MessageChannel.class);
+        inputChannel.send(MessageBuilder.withPayload(payload).build());
+    }
+
 }

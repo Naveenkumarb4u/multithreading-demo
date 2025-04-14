@@ -1,14 +1,12 @@
 package com.multithreading.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@AllArgsConstructor
+@Data
 public class MyPayload {
     private String payloadId;
-
-    public MyPayload(String payloadId) {
-        this.payloadId = payloadId;
-    }
-
-    public String getPayloadId() {
-        return payloadId;
-    }
+    private String data;
 }
 
